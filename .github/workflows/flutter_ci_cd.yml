@@ -1,55 +1,44 @@
-name: Flutter CI/CD
+name: Flutter CI/CD (Android)
 
-# Trigger workflow on push or PR
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
-  build_android:
+  build:
 
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout code
+      - uses: actions/checkout@v3
 
-      # 2️⃣ Setup Flutter
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      # Setup Flutter
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0' # use your Flutter version
+          flutter-version: '3.38.5'  # use latest stable
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
-        run: flutter pub get
-
-      # 4️⃣ Run Flutter analyzer
-      - name: Analyze code
-        run: flutter analyze
-
-      # 5️⃣ Run tests
-      - name: Run tests
-        run: flutter test --coverage
-
-      # 6️⃣ Build Android APK
-      - name: Build APK
-        run: flutter build apk --release
-
-      # 7️⃣ Upload APK as artifact for download/check
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+      # Cache dependencies (faster builds)
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
         with:
-          name: app-release-apk
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-cache
+
+      # Install dependencies
+      - run: flutter pub get
+
+      # Analyze code
+      - run: flutter analyze
+
+      # Run tests
+      - run: flutter test
+
+      # Build APK
+      - run: flutter build apk --release
+
+      # Upload APK for download
+      - uses: actions/upload-artifact@v3
+        with:
+          name: apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
-      # 8️⃣ Create GitHub release & upload APK
-      - name: Create Release & Upload APK
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/app/outputs/flutter-apk/app-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

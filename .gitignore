@@ -46,3 +46,4 @@ app.*.map.json
 
 #Ios
 /ios/DerivedData
+/ios/.symlinks
