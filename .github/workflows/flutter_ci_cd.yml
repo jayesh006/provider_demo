@@ -41,7 +41,7 @@ jobs:
   # 🔹 iOS BUILD
   ios:
     name: Build iOS App
-    runs-on: macos-latest   # 🍎 required
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -58,10 +58,17 @@ jobs:
 
       - run: flutter pub get
 
+      # ✅ IMPORTANT FIX
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
       - run: flutter analyze || true
       - run: flutter test || true
 
-      # Build iOS (no signing)
+      # Build iOS
       - run: flutter build ios --release --no-codesign
 
       - name: Upload iOS Build
