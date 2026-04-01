@@ -1,0 +1,55 @@
+name: Flutter CI/CD
+
+# Trigger workflow on push or PR
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build_android:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0' # use your Flutter version
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4️⃣ Run Flutter analyzer
+      - name: Analyze code
+        run: flutter analyze
+
+      # 5️⃣ Run tests
+      - name: Run tests
+        run: flutter test --coverage
+
+      # 6️⃣ Build Android APK
+      - name: Build APK
+        run: flutter build apk --release
+
+      # 7️⃣ Upload APK as artifact for download/check
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      # 8️⃣ Create GitHub release & upload APK
+      - name: Create Release & Upload APK
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
