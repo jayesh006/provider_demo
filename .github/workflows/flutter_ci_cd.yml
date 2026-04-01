@@ -5,40 +5,67 @@ on:
     branches: [main]
 
 jobs:
-  build:
 
+  # 🔹 ANDROID BUILD
+  android:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
       - uses: actions/checkout@v3
 
-      # Setup Flutter
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.5'  # use latest stable
+          flutter-version: '3.38.5'
 
-      # Cache dependencies (faster builds)
       - name: Cache Flutter packages
         uses: actions/cache@v3
         with:
           path: ~/.pub-cache
           key: ${{ runner.os }}-pub-cache
 
-      # Install dependencies
       - run: flutter pub get
 
-      # Analyze code
-      - run:  flutter analyze || true
-
-      # Run tests
+      - run: flutter analyze || true
       - run: flutter test || true
 
-      # Build APK
       - run: flutter build apk --release
 
-      # Upload APK for download
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+
+  # 🔹 iOS BUILD
+  ios:
+    name: Build iOS App
+    runs-on: macos-latest   # 🍎 required
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-cache
+
+      - run: flutter pub get
+
+      - run: flutter analyze || true
+      - run: flutter test || true
+
+      # Build iOS (no signing)
+      - run: flutter build ios --release --no-codesign
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app
+          path: build/ios/iphoneos/Runner.app
