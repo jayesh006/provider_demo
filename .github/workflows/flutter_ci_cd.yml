@@ -1,4 +1,4 @@
-name: Flutter CI/CD (Android)
+name: Upload APK artifact
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
       - run: flutter build apk --release
 
       # Upload APK for download
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: apk
           path: build/app/outputs/flutter-apk/app-release.apk
