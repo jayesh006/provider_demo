@@ -1,4 +1,4 @@
-name: Upload APK artifact
+name: Flutter CI/CD (Android + iOS + Web)
 
 on:
   push:
@@ -37,7 +37,6 @@ jobs:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-
   # 🔹 iOS BUILD
   ios:
     name: Build iOS App
@@ -58,7 +57,7 @@ jobs:
 
       - run: flutter pub get
 
-      # ✅ IMPORTANT FIX
+      # ✅ Install CocoaPods
       - name: Install CocoaPods
         run: |
           cd ios
@@ -76,3 +75,34 @@ jobs:
         with:
           name: ios-app
           path: build/ios/iphoneos/Runner.app
+
+  # 🔹 WEB BUILD
+  web:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-cache
+
+      - run: flutter pub get
+
+      - run: flutter analyze || true
+      - run: flutter test || true
+
+      - run: flutter build web --release
+
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
