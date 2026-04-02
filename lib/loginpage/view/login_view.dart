@@ -60,8 +60,8 @@ class LoginView extends StatelessWidget {
                       : Icon(Icons.visibility_off),
                 ),
                 SizedBox(height: 20,),
-                if(loginViewModel.isError != null)
-                  Text(loginViewModel.isError),
+                loginViewModel.isError.isNotEmpty ?
+                  Text(loginViewModel.isError) : SizedBox.shrink(),
                 SizedBox(height: 20),
                 (loginViewModel.isLoading == true)
                     ? CircularProgressIndicator()
